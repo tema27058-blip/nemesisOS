@@ -1,6 +1,8 @@
 #include <nemesis/print.h>
 #include <nemesis/uart.h>
 
+static const char hex_digits[] = "0123456789abcdef";
+
 void print_str(const char *s)
 {
     uart_puts(s);
@@ -12,10 +14,10 @@ void print_line(const char *s)
     uart_putc('\n');
 }
 
-void print_u64(unsigned long long value)
+void print_u64(u64 value)
 {
-    char buf[32];
-    int i = 0;
+    char buffer[32];
+    int index = 0;
 
     if (value == 0) {
         uart_putc('0');
@@ -23,11 +25,20 @@ void print_u64(unsigned long long value)
     }
 
     while (value > 0) {
-        buf[i++] = (char)('0' + (value % 10));
+        buffer[index++] = (char)('0' + (value % 10));
         value /= 10;
     }
 
-    while (i > 0) {
-        uart_putc(buf[--i]);
+    while (index > 0) {
+        uart_putc(buffer[--index]);
+    }
+}
+
+void print_hex(u64 value)
+{
+    int shift;
+
+    for (shift = 60; shift >= 0; shift -= 4) {
+        uart_putc(hex_digits[(value >> shift) & 0xf]);
     }
 }

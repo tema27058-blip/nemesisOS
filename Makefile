@@ -5,6 +5,7 @@ OBJCOPY := $(CROSS)objcopy
 
 ARCH_DIR := nemesisKernel/arch/arm64
 KERNEL_DIR := nemesisKernel/kernel
+MM_DIR := nemesisKernel/mm
 INC_DIR := nemesisKernel/include
 
 CFLAGS := -ffreestanding -nostdlib -nostartfiles \
@@ -17,8 +18,14 @@ OBJS := \
 	$(ARCH_DIR)/start.o \
 	$(ARCH_DIR)/uart.o \
 	$(ARCH_DIR)/main.o \
+	$(ARCH_DIR)/exceptions.o \
+	$(ARCH_DIR)/timer.o \
+	$(ARCH_DIR)/switch.o \
 	$(KERNEL_DIR)/panic.o \
-	$(KERNEL_DIR)/print.o
+	$(KERNEL_DIR)/print.o \
+	$(KERNEL_DIR)/exceptions.o \
+	$(KERNEL_DIR)/sched.o \
+	$(MM_DIR)/pmm.o
 
 all: build/nemesisKernel.bin
 
