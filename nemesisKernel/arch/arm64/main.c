@@ -1,5 +1,5 @@
 #include <nemesis/exceptions.h>
-#include <nemesis/gpu.h>
+#include <nemesis/framebuffer.h>
 #include <nemesis/mm.h>
 #include <nemesis/print.h>
 #include <nemesis/sched.h>
@@ -27,26 +27,19 @@ static void task_b(void)
     }
 }
 
-static void boot_splash(void)
+static void show_boot_animation(void)
 {
-    fb_clear(0xff0d1117);
+    framebuffer_clear(0x0b0b12);
+    framebuffer_logo(240, 240, 0xffffff, 4);
+    framebuffer_text(268, 320, "v0.0.3", 0x8a8a98, 2);
 
-    /* nemesisOS logo mark. */
-    fb_rect(452, 280, 40, 160, 0xff7c5cff);
-    fb_rect(492, 280, 40, 40, 0xff7c5cff);
-    fb_rect(532, 320, 40, 120, 0xff7c5cff);
-
-    fb_flush();
-    delay_ms(500);
-
-    for (int progress = 0; progress <= 100; progress += 2) {
-        fb_rect(312, 520, 400, 10, 0xff1f2430);
-        fb_rect(312, 520, progress * 4, 10, 0xff7c5cff);
-        fb_flush();
-        delay_ms(20);
+    for (u32 progress = 0; progress <= 100; progress += 2) {
+        framebuffer_loading_bar(progress);
+        delay_ms(25);
     }
 
-    delay_ms(400);
+    framebuffer_text(300, 420, "Loading nemesisOS", 0xbcbcc8, 2);
+    delay_ms(800);
 }
 
 void kernel_main(void)
@@ -55,21 +48,13 @@ void kernel_main(void)
     exceptions_init();
     timer_init();
     pmm_init();
+    framebuffer_init();
     sched_init();
 
     print_line("nemesisOS v0.0.3");
-    print_line("nemesisKernel: graphics bring-up");
+    print_line("nemesisKernel: framebuffer graphics enabled");
 
-    int display = fb_init();
-
-    if (display == 0) {
-        print_line("virtio-gpu: framebuffer ready");
-        boot_splash();
-    } else {
-        print_str("virtio-gpu init failed: ");
-        print_u64((u64)-display);
-        print_line("");
-    }
+    show_boot_animation();
 
     task_create(task_a, &task_a_stack[4096]);
     task_create(task_b, &task_b_stack[4096]);
